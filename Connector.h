@@ -22,7 +22,7 @@ public:
 	Connector();
 	virtual ~Connector();
 	void Connect();
-	void Send();
+	void Send(std::string header);
 	std::string Receive();
 	void Close();
 	bool IsError() const { return !err; }

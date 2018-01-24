@@ -33,11 +33,14 @@ void Connector::Connect()
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;		// IPv4
 	hints.ai_socktype = SOCK_STREAM; // TCP stream-sockets
+
+	printf("Get host info...");
 	err = getaddrinfo(HOST_GOOGLE, SERVICE, &hints, &servinfo);
 	if (err) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(err));
 		return;
 	}
+	printf("[ OK ]\n");
 
 	// Get ip address
 	struct sockaddr_in *saddr = (struct sockaddr_in *) servinfo->ai_addr;
@@ -66,19 +69,19 @@ void Connector::Close()
 	err = 1;
 }
 
-void Connector::Send()
+void Connector::Send(std::string header)
 {
 	ssize_t n;
-	std::string header;
-		header = "GET / HTTP/1.0\r\n";
-		header += "Host: " + std::string(HOST_GOOGLE) + "\r\n";
-		header += "User-Agent: Mozilla-Firefox\r\n";
-		header += "Accept: */*\r\n\r\n";
 
 	if (sockfd < 0) {
 		printf("Hmm...Socket is closed. I can't send data\n");
 		return;
 	}
+	if (header.empty()) {
+		printf("[Send] header is empty\n");
+		return;
+	}
+
 	n = send(sockfd, header.data(), header.length(), 0);
 	if (n < 0) {
 		printf("Error send\n");
