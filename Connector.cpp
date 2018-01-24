@@ -26,9 +26,9 @@ Connector::~Connector()
 void Connector::Connect()
 {
 	struct addrinfo hints, *servinfo;
-	char ipstr[INET6_ADDRSTRLEN];
+	char ipstr[INET_ADDRSTRLEN];
 
-	printf("Connect to %s\n", HOST_GOOGLE);
+	printf("Connection with %s\n", HOST_GOOGLE);
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;		// IPv4
@@ -39,7 +39,7 @@ void Connector::Connect()
 		return;
 	}
 
-	// GEt ip address
+	// Get ip address
 	struct sockaddr_in *saddr = (struct sockaddr_in *) servinfo->ai_addr;
 	if (inet_ntop(servinfo->ai_family, &saddr->sin_addr, ipstr, sizeof(ipstr)) == NULL)
 		printf("Can't get ip address\n");
@@ -71,7 +71,7 @@ void Connector::Send()
 	ssize_t n;
 	std::string header;
 		header = "GET / HTTP/1.0\r\n";
-		header += "Host: google.com\r\n";
+		header += "Host: " + std::string(HOST_GOOGLE) + "\r\n";
 		header += "User-Agent: Mozilla-Firefox\r\n";
 		header += "Accept: */*\r\n\r\n";
 
@@ -88,24 +88,28 @@ void Connector::Send()
 	printRequest(true, header);
 }
 
-void Connector::Receive()
+std::string Connector::Receive()
 {
 	ssize_t n;
+	char rbuf[1024];
 
 	if (sockfd < 0) {
 		printf("Hmm...Socket is closed. I can't receive data\n");
-		return;
+		return "";
 	}
+	memset(rbuf, 0, sizeof(rbuf));
 	n = recv(sockfd, rbuf, sizeof(rbuf), 0);
 	if (n < 0) {
 		printf("Error recv");
-		return;
+		err = 1;
+		return "";
 	}
 	printf("read=%ld bytes\n", n);
-	printRequest(false, std::string(rbuf));
+	printRequest(false, rbuf);
+	return rbuf;
 }
 
-void Connector::printRequest(bool recv, std::string str)
+void Connector::printRequest(bool recv, const std::string str) const
 {
 	printf("%3d%c ", 0, (recv ? '>' : '<'));
 	for (size_t i = 0, j = 1; i < str.length(); i++) {
@@ -118,4 +122,3 @@ void Connector::printRequest(bool recv, std::string str)
 	}
 	printf("\n");
 }
-

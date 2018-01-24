@@ -16,20 +16,19 @@
 
 class Connector {
 	int sockfd = -1;
-	char rbuf[1024];
-	int err = 1;
+	mutable int err = 1;
 
 public:
 	Connector();
 	virtual ~Connector();
 	void Connect();
 	void Send();
-	void Receive();
+	std::string Receive();
 	void Close();
-	bool GetError() { return !err; }
+	bool IsError() const { return !err; }
 
 private:
-	void printRequest(bool recv, std::string str);
+	void printRequest(bool recv, const std::string str) const;
 };
 
 #endif /* CONNECTOR_H_ */
